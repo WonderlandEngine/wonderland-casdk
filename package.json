@@ -1,0 +1,18 @@
+{
+  "name": "wonderland-casdk",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "esbuild ./wonderland-casdk.js --minify --sourcemap --bundle --outfile=../wonderland-casdk.min.js"
+  },
+  "author": "Wonderland GmbH",
+  "license": "MIT",
+  "devDependencies": {
+    "esbuild": "^0.11.14"
+  },
+  "dependencies": {
+    "@wonderlandengine/api": "^0.8.6",
+    "@wonderlandengine/components": "^0.8.6"
+  }
+}
