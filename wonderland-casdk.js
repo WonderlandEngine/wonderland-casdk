@@ -397,7 +397,7 @@ WL.registerComponent('casdk-leaderboard', {
     /** Whether to show scores around player's score or World scores, starting at 1. */
     mode: {type: WL.Type.Enum, values: ['world', 'player']},
 }, {
-    start: function() {
+    init: function() {
         if(this.scoreStorageMultiplier == 0) {
             throw new Error("scoreStorageMultiplier cannot be 0 on", this.object.name);
         }
@@ -405,6 +405,18 @@ WL.registerComponent('casdk-leaderboard', {
         if(!this.columnRank) console.warn("[casdk-leaderboard] columnRank not set on", this.object.name);
         if(!this.columnName) console.warn("[casdk-leaderboard] columnName not set on", this.object.name);
         if(!this.columnScore) console.warn("[casdk-leaderboard] columnScore not set on", this.object.name);
+
+        if(this.scoreType > 1) {
+            this.valueRenderer = (v) => {
+                const ds = Math.floor(v % 10); /* deciseconds */
+                const s = Math.floor(v/10) % 60;
+                const m = Math.floor(v/600);
+                return `${m}:${s < 10 ? '0' : ''}${s}.${ds}`
+            };
+        }
+    },
+
+    start: function() {
         this.setLeaderboardId(this.leaderboardId);
     },
 
@@ -428,19 +440,25 @@ WL.registerComponent('casdk-leaderboard', {
             mode: this.mode,
             scoreStorageMultiplier: this.scoreStorageMultiplier,
         };
-        if(this.scoreType > 1) {
-            leaderboardSettings.valueRenderer = (v) => {
-                const ds = Math.floor(v % 10); /* deciseconds */
-                const s = Math.floor(v/10) % 60;
-                const m = Math.floor(v/600);
-                return `${m}:${s < 10 ? '0' : ''}${s}.${ds}`
-            };
-        }
+        if(this.valueRenderer) leaderboardSettings.valueRenderer = this.valueRenderer;
         this.leaderboard = new WLCASDKLeaderboard(this.leaderboardId, leaderboardSettings);
         /* Don't retrieve empty ids */
         if(this.leaderboardId) {
             this.leaderboard.getLeaderboard()
                 .then(this.updateTexts.bind(this));
+        }
+    },
+
+    /**
+     * Set function to convert leaderboard score value into string
+     *
+     * Calls updateTexts() if a leaderboard is currently active.
+     */
+    setValueRenderer: function(valueRenderer) {
+        this.valueRenderer = valueRenderer;
+        if(this.leaderboard) {
+            this.leaderboard.options.valueRenderer;
+            this.updateTexts();
         }
     },
 
