@@ -1,7 +1,10 @@
 /* Wrapper class for CASDK to handle callbacks and other boilterplate tasks */
 export class WLCASDK {
-    static init(debug = false) {
+    gameId = null;
+
+    static init(debug = false, gameId = null) {
         this.inventory = [];
+        this.gameId = gameId;
         if(!('casdk' in window) && debug) {
             this.debug = true;
             this.debugIsLoggedIn = false;
@@ -387,12 +390,23 @@ class WLCASDKLeaderboard {
     }
 };
 
+/**
+@class casdk
+@classdesc CASDK Initializer
+
+Initializes the Construct Arcade SDK.
+
+@property {WL.Type.Bool} debug Initialize in debug mode, allowing testing without deploying to Construct Arcade
+@property {WL.Type.String} gameId Your game id, retrieve one from the Construct Arcade team.
+*/
 WL.registerComponent('casdk', {
-    debug: {type: WL.Type.Bool, default: false}
+    debug: {type: WL.Type.Bool, default: false},
+    gameId: {type: WL.Type.String, default: 'your-game-id'}
 }, {
     start: function() {
-        /* Ensure other casdk components registered their callbacks */
-        setTimeout(() => WLCASDK.init(this.debug), 0);
+        /* Timeout ensures other casdk components registered their callbacks
+         * before the SDK is initialized */
+        setTimeout(() => WLCASDK.init(this.debug, this.gameId), 0);
     }
 });
 
