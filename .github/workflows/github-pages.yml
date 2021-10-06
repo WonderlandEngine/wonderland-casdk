@@ -9,15 +9,15 @@ jobs:
       uses: actions/setup-node@v2
       with:
         node-version: 15.x
+    - name: Install dependencies
+      run: npm ci
+    - name: Generate docs
+      run: npm run docs
     - name: Upload package artifact
       uses: actions/upload-artifact@v2
       with:
         name: Project-deploy
         path: docs/wonderland-casdk/1.0.0/
-    - name: Install dependencies
-      run: npm ci
-    - name: Generate docs
-      run: npm run docs
 
   deploy:
     needs: docs
