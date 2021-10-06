@@ -204,6 +204,14 @@ WL.registerComponent('casdk-login-button', {
     }
 });
 
+/**
+CASDK User Message
+
+Switches a text component attached to the same object to between
+a message when logged out and a message when logged in (which can
+make use of the username by `{username}`), e.g. greet the user by
+his username.
+*/
 WL.registerComponent('casdk-user-message', {
     messageLoggedIn: {type: WL.Type.String, default: "Welcome, {username}!"},
     messageLoggedOut: {type: WL.Type.String, default: "Log in to submit scores!"},
