@@ -20,7 +20,7 @@ jobs:
       run: npm run docs
 
   deploy:
-    needs: package
+    needs: docs
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
