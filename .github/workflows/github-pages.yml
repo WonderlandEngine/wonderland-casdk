@@ -13,21 +13,21 @@ jobs:
       run: npm ci
     - name: Generate docs
       run: npm run docs
-    - name: Upload package artifact
+    - name: Upload generated docs artifact
       uses: actions/upload-artifact@v2
       with:
-        name: Project-deploy
-        path: docs/wonderland-casdk/1.0.0/
+        name: generated-docs
+        path: docs/wonderland-casdk/1.0.0
 
   deploy:
     needs: docs
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Download package artifact
+    - name: Download generated docs artifact
       uses: actions/download-artifact@v2
       with:
-        name: Project-deploy
+        name: generated-docs
         path: deploy
     - name: Deploy to GitHub Pages
       uses: JamesIves/github-pages-deploy-action@4.1.1
