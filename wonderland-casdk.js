@@ -1,5 +1,5 @@
+/* Wrapper class for CASDK to handle callbacks and other boilterplate tasks */
 export class WLCASDK {
-
     static init(debug = false) {
         this.inventory = [];
         if(!('casdk' in window) && debug) {
@@ -156,7 +156,8 @@ export class WLCASDK {
 };
 
 /**
-CASDK Login Button
+@class casdk-login-button
+@classdesc CASDK Login Button
 
 Adds a click callback to an existing `cursor-target` (or creates one) which
 opens the Construct Arcade login dialog.
@@ -164,9 +165,10 @@ opens the Construct Arcade login dialog.
 If the user is already logged in, the callback will not be added.
 
 This will eventually trigger `WLCASDK.userUpdateCallbacks`.
+
+@property {WL.Type.Object} loginButton Optional object to disable on login.
 */
 WL.registerComponent('casdk-login-button', {
-    /* Optional object to disable on login */
     loginButton: {type: WL.Type.Object}
 }, {
     init: function() {
@@ -205,17 +207,23 @@ WL.registerComponent('casdk-login-button', {
 });
 
 /**
-CASDK User Message
+@class casdk-user-message
+@classdesc CASDK User Message Component
 
 Switches a text component attached to the same object to between
 a message when logged out and a message when logged in (which can
 make use of the username by `{username}`), e.g. greet the user by
 his username.
+
+@property {WL.Type.String} messageLoggedIn Message to display when user
+    is logged in.
+@property {WL.Type.String} messageLoggedOut Message to display when user
+    is not logged in.
 */
 WL.registerComponent('casdk-user-message', {
     messageLoggedIn: {type: WL.Type.String, default: "Welcome, {username}!"},
     messageLoggedOut: {type: WL.Type.String, default: "Log in to submit scores!"},
-}, {
+}, /** @lends casdk-user-message */ {
     start: function() {
         /* Workaround for multiline strings not available yet */
         this.messageLoggedIn = this.messageLoggedIn.replaceAll('\\n', '\n');
@@ -232,6 +240,11 @@ WL.registerComponent('casdk-user-message', {
         }
     },
 
+    /**
+     * Update username
+     *
+     * @param {string} u New username
+     */
     updateUsername: function(u) {
         this.object.getComponent('text').text =
             this.messageLoggedIn.replaceAll('{username}', u.displayName);
@@ -327,7 +340,7 @@ class WLCASDKLeaderboard {
             });
     }
 
-    /**
+    /*
      * Request an update of the leaderboard entries.
      *
      * This is already done after @ref submitScore()
@@ -383,28 +396,37 @@ WL.registerComponent('casdk', {
     }
 });
 
-WL.registerComponent('casdk-leaderboard', {
-    /** Construct Arcade Leaderboard Id, contact their support to get one */
+/**
+@class casdk-leaderboard
+@classdesc CASDK Leaderboard
+
+Handles updating of three leaderboard table columns and submission of scores
+to the Construct Arcade API services.
+
+@property {WL.Type.String} leaderboardId Construct Arcade Leaderboard Id, contact their support to get one
+@property {WL.Type.Object} columnRank Object with text component to set to the rank column
+@property {WL.Type.Object} columnName Object with text component to set to the display name column
+@property {WL.Type.Object} columnScore Object with text component to set to the score column
+@property {WL.Type.Int} maxRows Max amount of rows to display
+@property {WL.Type.Enum} scoreType Score type for display and sorting. Penalty is "bad" score.
+Time based scores expect values in deciseconds. If you need
+other units, use the scoreStorageMultiplier. *
+@property {WL.Type.Float} scoreStorageMultiplier Multiplier to retrieve an integral value to submit to Construct Arcade leaderboards
+*/
+WL.registerComponent('casdk-leaderboard',
+    {
     leaderboardId: {type: WL.Type.String, default: 'my-game-1'},
-    /** Object with text component to set to the rank column */
     columnRank: {type: WL.Type.Object},
-    /** Object with text component to set to the display name column */
     columnName: {type: WL.Type.Object},
-    /** Object with text component to set to the score column */
+    /** @property {WL.Type.Float} mode Whether to show scores around player's score or World scores, starting at 1. */
     columnScore: {type: WL.Type.Object},
-    /** Max amount of rows to display */
     maxRows: {type: WL.Type.Int, default: 8},
-    /** Score type for display and sorting. Penalty is "bad" score.
-     * Time based scores expect values in deciseconds. If you need
-     * other units, use the scoreStorageMultiplier. */
     scoreType: {type: WL.Type.Enum, values:
         ['score', 'penalty', 'longest time', 'fastest time'],
         default: 'score'},
-    /** Multiplier to retrieve an integral value to submit to Construct Arcade leaderboards */
     scoreStorageMultiplier: {type: WL.Type.Float, default: 1.0},
-    /** Whether to show scores around player's score or World scores, starting at 1. */
     mode: {type: WL.Type.Enum, values: ['world', 'player']},
-}, {
+}, /** @lends casdk-leaderboard */ {
     init: function() {
         if(this.scoreStorageMultiplier == 0) {
             throw new Error("scoreStorageMultiplier cannot be 0 on", this.object.name);
@@ -428,6 +450,11 @@ WL.registerComponent('casdk-leaderboard', {
         this.setLeaderboardId(this.leaderboardId);
     },
 
+    /**
+     * Update texts to match internal leaderboard data.
+     *
+     * Usually called automatically for you.
+     */
     updateTexts: function() {
         const c = this.leaderboard.columns;
         if(this.columnRank)
@@ -438,6 +465,13 @@ WL.registerComponent('casdk-leaderboard', {
             this.columnScore.getComponent('text').text = c.score.slice(0, this.maxRows).join('\n');
     },
 
+    /**
+     * Set the id of the leaderboard.
+     *
+     * Get ids from the Construct Arcade team, reach out to them via Discord or E-Mail.
+     *
+     * @param {string} newId New leaderboard id.
+     */
     setLeaderboardId: function(newId) {
         this.leaderboardId = newId;
 
@@ -458,9 +492,19 @@ WL.registerComponent('casdk-leaderboard', {
     },
 
     /**
-     * Set function to convert leaderboard score value into string
+     * @callback ValueRenderer
+     *
+     * Function that takes a number score value and returns a string representation.
+     *
+     * @param {number} score Score to convert to string.
+     * @returns {string} Converted score
+     */
+    /**
+     * Set a function for converting leaderboard score value into string.
      *
      * Calls updateTexts() if a leaderboard is currently active.
+     *
+     * @param {ValueRenderer} valueRenderer Function for converting scores to string
      */
     setValueRenderer: function(valueRenderer) {
         this.valueRenderer = valueRenderer;
@@ -470,6 +514,12 @@ WL.registerComponent('casdk-leaderboard', {
         }
     },
 
+    /**
+     * Submit a score for player with given name
+     *
+     * @param {string} name Player name
+     * @param {number} score Score to submit
+     */
     submit: function(name, score) {
         this.leaderboard.submit(name, score);
         this.updateTexts();

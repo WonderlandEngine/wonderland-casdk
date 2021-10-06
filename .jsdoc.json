@@ -1,0 +1,46 @@
+{
+  "source": {
+    "include": ["wonderland-casdk.js", "package.json", "README.md"],
+    "includePattern": ".*.js$",
+    "excludePattern": "(node_modules/|docs)"
+  },
+
+  "plugins": ["plugins/markdown"],
+
+  "opts": {
+    "encoding": "utf8",
+    "readme": "./README.md",
+    "destination": "docs/",
+    "recurse": true,
+    "verbose": true,
+    "template": "./node_modules/clean-jsdoc-theme",
+    "theme_opts": {
+      "title": "Construct Arcade SDK for Wonderland Engine",
+      "menu" : [
+        {
+          "title": "Wonderland Engine Website",
+          "link": "https://wonderlandengine.com/",
+          "target": "_blank"
+        }
+      ],
+      "meta" : [
+        {
+          "name": "author",
+          "content": "Jonathan Hale"
+        },
+        {
+          "name": "description",
+          "content": "API Documentation of the Construct Arcade SDK for Wonderland Engine."
+        }
+      ],
+      "search": {
+        "shouldSort": true,
+        "threshold": 0.4,
+        "location": 0,
+        "distance": 100,
+        "maxPatternLength": 32,
+        "minMatchCharLength": 1
+      }
+    }
+  }
+}
