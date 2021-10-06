@@ -33,4 +33,4 @@ jobs:
       uses: JamesIves/github-pages-deploy-action@4.1.1
       with:
         branch: gh-pages
-        folder: docs/wonderland-casdk/1.0.0
+        folder: 1.0.0
