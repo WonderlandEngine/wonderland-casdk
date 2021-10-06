@@ -24,7 +24,7 @@ export class WLCASDK {
             }.bind(this), 1000);
         }) : casdk.getAmountCurrency()).then(function(a) {
             if(a.error) return;
-            for(const f of WLCASDK.balanceUpdateCallbacks) f(a.currency);
+            for(const f of this.balanceUpdateCallbacks) f(a.currency);
         }.bind(this));
     }
 
@@ -32,11 +32,11 @@ export class WLCASDK {
     /** Calls all `loginStatusChangeCallbacks` */
     static updateLoginStatus(e) {
         if(e.detail.status === 'connected') {
-            for(const f of WLCASDK.loginStatusChangeCallbacks) f(true);
-            WLCASDK.getInventory();
-            WLCASDK.updateCoinBalance();
+            for(const f of this.loginStatusChangeCallbacks) f(true);
+            this.getInventory();
+            this.updateCoinBalance();
         } else {
-            for(const f of WLCASDK.loginStatusChangeCallbacks) f(false);
+            for(const f of this.loginStatusChangeCallbacks) f(false);
         }
     }
 
@@ -54,10 +54,10 @@ export class WLCASDK {
                 inventory = [];
                 return;
             }
-            WLCASDK.inventory = i.inventory;
-            for(const f of WLCASDK.inventoryUpdateCallbacks) f(false);
+            this.inventory = i.inventory;
+            for(const f of this.inventoryUpdateCallbacks) f(false);
         }).catch(function() {
-          inventory = [];
+          this.inventory = [];
           this.activePurchase = false;
         }.bind(this));
     }
@@ -97,10 +97,10 @@ export class WLCASDK {
             casdk.purchaseItem(this.gameId, this.item.itemId, this.item.price)
                 .then(this.unlock.bind(this))
                 .catch(function(err){
-                  if(err.error == "Not enough funds") {
-                    openCoinStore();
-                  }
-                  this.activePurchase = false;
+                    if(err.error == "Not enough funds") {
+                        openCoinStore();
+                    }
+                    this.activePurchase = false;
                 }.bind(this));
         }
     }
@@ -109,14 +109,14 @@ export class WLCASDK {
         if(WL.xrSession) {
             WL.xrSession.end().then(function() {
                 const w = window.open('/coin');
-                w.addEventListener('beforeunload', function() {
-                    WLCASDK.updateCoinBalance();
+                w.addEventListener('beforeunload', () => {
+                    this.updateCoinBalance();
                 });
             });
         } else {
             const w = window.open('/coin');
-            w.addEventListener('beforeunload', function() {
-                WLCASDK.updateCoinBalance();
+            w.addEventListener('beforeunload', () => {
+                this.updateCoinBalance();
             });
         }
     }
@@ -153,7 +153,7 @@ export class WLCASDK {
             })
         : casdk.getUser()).then((userData) => {
             if(!userData.user) return;
-            for(const f of WLCASDK.userUpdateCallbacks) f(userData.user);
+            for(const f of this.userUpdateCallbacks) f(userData.user);
         });
     }
 };
