@@ -70,7 +70,7 @@ export class WLCASDK {
             return
         }
         return casdk.getCatalog(this.gameId).then(function(c) {
-            catalog = c.catalog;
+            this.catalog = c.catalog;
             if(!casdk.isLoggedIn()) {
                 return;
             }
@@ -79,7 +79,7 @@ export class WLCASDK {
     }
 
     static async purchaseItem(item) {
-        if(this.activePurchase || !catalog) return;
+        if(this.activePurchase || !this.catalog) return;
 
         this.activePurchase = true;
 
@@ -94,7 +94,7 @@ export class WLCASDK {
         }
 
         if(item && !this.itemOwned) {
-            casdk.purchaseItem(this.gameId, this.item.itemId, this.item.price)
+            casdk.purchaseItem(this.gameId, item.itemId, item.price)
                 .then(this.unlock.bind(this))
                 .catch(function(err){
                     if(err.error == "Not enough funds") {
