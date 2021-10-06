@@ -17,7 +17,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: generated-docs
-        path: docs/wonderland-casdk/1.0.0
+        path: docs/wonderland-casdk/1.0.0/
 
   deploy:
     needs: docs
@@ -28,9 +28,9 @@ jobs:
       uses: actions/download-artifact@v2
       with:
         name: generated-docs
-        path: deploy
+        path: docs
     - name: Deploy to GitHub Pages
       uses: JamesIves/github-pages-deploy-action@4.1.1
       with:
         branch: gh-pages
-        folder: 1.0.0
+        folder: docs
