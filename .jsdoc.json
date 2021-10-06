@@ -21,6 +21,11 @@
           "title": "Wonderland Engine Website",
           "link": "https://wonderlandengine.com/",
           "target": "_blank"
+        },
+        {
+          "title": "Github",
+          "link": "https://github.com/WonderlandEngine/wonderland-casdk",
+          "target": "_blank"
         }
       ],
       "meta" : [
