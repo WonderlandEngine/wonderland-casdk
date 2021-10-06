@@ -539,3 +539,55 @@ WL.registerComponent('casdk-leaderboard',
         this.updateTexts();
     }
 });
+
+/**
+@class casdk-coin-balance
+@classdesc Construct Arcade Coin balance display
+
+Changes a text to display the amount of coins the user
+currently owns.
+
+@property {WL.Type.Material} material Material to use when creating a text component.
+    Can be `null` if the object already has a text component attached.
+*/
+WL.registerComponent('casdk-coin-balance', {
+    material: {type: WL.Type.Material}
+}, /** @lends casdk-coin-balance */ {
+    init: function() {
+        this.balance = '?';
+        WLCASDK.balanceUpdateCallbacks.push(this.updateCoinBalance.bind(this));
+    },
+    start: function() {
+        this.text = this.object.getComponent('text') || this.object.addComponent('text', {
+            material: this.material,
+            text: this.balance.toString()
+        });
+    },
+
+    updateCoinBalance: function(balance) {
+        this.balance = balance;
+        if(this.text) this.text = balance.toString();
+    }
+});
+
+/**
+@class casdk-purchase-button
+@classdesc Button to purchase a specific item.
+
+@property {WL.Type.String} itemId Item to purchase
+*/
+WL.registerComponent('casdk-coin-balance', {
+    material: {WL.Type.Material}
+}, /** @lends casdk-coin-balance */ {
+    start: function() {
+        this.text = this.object.getComponent('text') || this.object.addComponent('text', {
+            material: this.material
+        });
+
+        WLCASDK.balanceUpdateCallbacks.push(this.updateCoinBalance.bind(this));
+    },
+
+    updateCoinBalance: function(balance) {
+        this.text = balance.toString();
+    }
+});
