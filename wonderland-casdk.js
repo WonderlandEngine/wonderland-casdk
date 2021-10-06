@@ -1,7 +1,64 @@
-/* Wrapper class for CASDK to handle callbacks and other boilterplate tasks */
-export class WLCASDK {
-    gameId = null;
+/**
+MIT License
 
+Copyright (c) 2021 Wonderland GmbH
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
+/**
+ * Wrapper class for CASDK to handle callbacks and other boilterplate tasks
+ * @namespace
+ */
+export class WLCASDK {
+    /**
+     * Current game id
+     * @type {string?}
+     */
+    static gameId = null;
+
+    /**
+     * @typedef Item
+     * @property {string} itemId Item ID
+     * @property {number} price Price
+     */
+
+    /**
+     * Current logged in player inventory
+     * @type {Item[]}
+     */
+    static inventory = [];
+
+    /**
+     * Catalog of purchasable items for initialized game id
+     * @type {Item[]}
+     */
+    static catalog = [];
+
+    /**
+     * Initialize CASDK with given game id.
+     *
+     * If you use the `casdk` comopnent, this will already be called for you.
+     *
+     * @param {boolean} debug Whether to enable debug mode to allow using the wrapper in local development environments.
+     * @param {string?} gameId Game id to initialize with.
+     */
     static init(debug = false, gameId = null) {
         this.inventory = [];
         this.gameId = gameId;
@@ -9,12 +66,13 @@ export class WLCASDK {
             this.debug = true;
             this.debugIsLoggedIn = false;
             this.updateLoginStatus({detail: {status: "none"}});
-            return
+            return;
         }
 
         window.addEventListener('casdk-login-status', this.updateLoginStatus.bind(this));
     }
 
+    /** Call when balance is updated */
     static balanceUpdateCallbacks = [];
     static updateCoinBalance() {
         (this.debug ?  new Promise((resolve, _) => {
@@ -28,8 +86,11 @@ export class WLCASDK {
         }.bind(this));
     }
 
+    /**
+     * Call when login status changes
+     */
     static loginStatusChangeCallbacks = [];
-    /** Calls all `loginStatusChangeCallbacks` */
+    /* (internal) Calls all `loginStatusChangeCallbacks` */
     static updateLoginStatus(e) {
         if(e.detail.status === 'connected') {
             for(const f of this.loginStatusChangeCallbacks) f(true);
@@ -40,7 +101,13 @@ export class WLCASDK {
         }
     }
 
+    /**
+     * Call when player inventory is updated
+     */
     static inventoryUpdateCallbacks = [];
+    /**
+     * Fetch inventory for logged in player
+     */
     static async getInventory() {
         (this.debug ?
             new Promise((resolve, _) => {
@@ -62,7 +129,11 @@ export class WLCASDK {
         }.bind(this));
     }
 
+    /**
+     * Call when game catalog is updated
+     */
     static catalogUpdateCallbacks = [];
+    /** Fetch catalog for your game */
     static async getCatalog() {
         if(this.debug) {
             console.warn("[wonderland-casdk] Debug catalog calls are not supported");
@@ -78,6 +149,13 @@ export class WLCASDK {
         }.bind(this));
     }
 
+    /**
+     * @brief Purchase an item
+     *
+     * Opens the coin store if the player's balance is insufficient.
+     *
+     * @param {Item} item Item to purchase with price that is currently known for this item.
+     */
     static async purchaseItem(item) {
         if(this.activePurchase || !this.catalog) return;
 
@@ -105,6 +183,7 @@ export class WLCASDK {
         }
     }
 
+    /** Opens the coin store browser page.  */
     static openCoinStore() {
         if(WL.xrSession) {
             WL.xrSession.end().then(function() {
@@ -121,6 +200,9 @@ export class WLCASDK {
         }
     }
 
+    /**
+     * Opens the login popup.
+     */
     static async login() {
         if(this.debug) {
             return new Promise((resolve, _) => {
@@ -141,7 +223,16 @@ export class WLCASDK {
         }
     }
 
+    /**
+     * @typedef User
+     * @property {string} displayName Display name
+     */
+    /** Called when the user data is retrieved/updated */
     static userUpdateCallbacks = [];
+    /**
+     * Retrieve user information
+     * @returns {Promise<User>} The user data
+     */
     static async getUser() {
         (this.debug ?
             /* Simulate a delayed request return */
@@ -574,20 +665,25 @@ WL.registerComponent('casdk-coin-balance', {
 @class casdk-purchase-button
 @classdesc Button to purchase a specific item.
 
-@property {WL.Type.String} itemId Item to purchase
-*/
-WL.registerComponent('casdk-coin-balance', {
-    material: {WL.Type.Material}
-}, /** @lends casdk-coin-balance */ {
-    start: function() {
-        this.text = this.object.getComponent('text') || this.object.addComponent('text', {
-            material: this.material
-        });
+Finds or creates a `cursor-target` component on the attached object
+and adds a click listener to purchase given item when clicked.
 
-        WLCASDK.balanceUpdateCallbacks.push(this.updateCoinBalance.bind(this));
+@property {WL.Type.String} itemId Item to purchase
+@property {WL.Type.String} expectedPrice Item to purchase
+*/
+WL.registerComponent('casdk-purchase-button', {
+    itemId: {type: WL.Type.String, default: 'item-id'},
+    expectedPrice: {type: WL.Type.Int, default: 0}
+}, /** @lends casdk-purchase-button */ {
+    start: function() {
+        const target = this.object.getComponent('cursor-target') || this.object.addComponent('cursor-target');
+        target.addClickFunction(this.onClick.bind(this));
     },
 
-    updateCoinBalance: function(balance) {
-        this.text = balance.toString();
+    onClick: function() {
+        WLCASDK.purchaseItem({
+            itemId: this.itemId,
+            price: this.expectedPrice
+        });
     }
 });
