@@ -410,15 +410,15 @@ to the Construct Arcade API services.
 @property {WL.Type.Int} maxRows Max amount of rows to display
 @property {WL.Type.Enum} scoreType Score type for display and sorting. Penalty is "bad" score.
 Time based scores expect values in deciseconds. If you need
-other units, use the scoreStorageMultiplier. *
+other units, use the scoreStorageMultiplier.
 @property {WL.Type.Float} scoreStorageMultiplier Multiplier to retrieve an integral value to submit to Construct Arcade leaderboards
+@property {WL.Type.Enum} mode Whether to show scores around player's score or World scores, starting at 1.
 */
 WL.registerComponent('casdk-leaderboard',
     {
     leaderboardId: {type: WL.Type.String, default: 'my-game-1'},
     columnRank: {type: WL.Type.Object},
     columnName: {type: WL.Type.Object},
-    /** @property {WL.Type.Float} mode Whether to show scores around player's score or World scores, starting at 1. */
     columnScore: {type: WL.Type.Object},
     maxRows: {type: WL.Type.Int, default: 8},
     scoreType: {type: WL.Type.Enum, values:
