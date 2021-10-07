@@ -678,7 +678,7 @@ Finds or creates a `cursor-target` component on the attached object
 and adds a click listener to purchase given item when clicked.
 
 @property {WL.Type.String} itemId Item to purchase
-@property {WL.Type.String} expectedPrice Item to purchase
+@property {WL.Type.Int} expectedPrice Price that is known to the client and was shown to the user
 */
 WL.registerComponent('casdk-purchase-button', {
     itemId: {type: WL.Type.String, default: 'item-id'},
