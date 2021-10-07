@@ -22,6 +22,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+if(typeof WL === 'undefined') {
+    var WL = {
+        /* Shim for running tests */
+        registerComponent: function() {},
+        Type: {}
+    };
+}
+
 /**
  * Wrapper class for CASDK to handle callbacks and other boilterplate tasks
  * @namespace
@@ -62,7 +70,7 @@ export class WLCASDK {
     static init(debug = false, gameId = null) {
         this.inventory = [];
         this.gameId = gameId;
-        if(!('casdk' in window) && debug) {
+        if(typeof casdk === 'undefined' && debug) {
             this.debug = true;
             this.debugIsLoggedIn = false;
             this.updateLoginStatus({detail: {status: "none"}});
@@ -211,7 +219,7 @@ export class WLCASDK {
                     this.debugIsLoggedIn = true;
                     this.updateLoginStatus({detail: {status: "connected"}});
                     resolve(true);
-                }.bind(this), 1000);
+                }.bind(this), 500);
             });
         }
         if(WL.xrSession) {
@@ -234,17 +242,18 @@ export class WLCASDK {
      * @returns {Promise<User>} The user data
      */
     static async getUser() {
-        (this.debug ?
+        return (this.debug ?
             /* Simulate a delayed request return */
             new Promise((resolve, _) => {
                 /* Simulate a delayed request return */
                 setTimeout(function() {
                     resolve({user: {displayName: "WonderfulUser"}});
-                }.bind(this), 1000);
+                }.bind(this), 500);
             })
         : casdk.getUser()).then((userData) => {
-            if(!userData.user) return;
+            if(!userData.user) return null;
             for(const f of this.userUpdateCallbacks) f(userData.user);
+            return userData.user;
         });
     }
 };

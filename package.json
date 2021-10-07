@@ -3,16 +3,19 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "build": "esbuild ./wonderland-casdk.js --minify --sourcemap --bundle --outfile=../wonderland-casdk.min.js",
+    "build": "esbuild ./wonderland-casdk.js --minify --sourcemap --bundle --outfile=./dist/wonderland-casdk.min.js",
     "docs": "jsdoc --configure .jsdoc.json --verbose",
-    "view-docs": "browser-sync start -s --files ./docs/wonderland-casdk/1.0.0/"
+    "view-docs": "browser-sync start -s --files ./docs/wonderland-casdk/1.0.0/",
+    "test": "mocha"
   },
   "author": "Wonderland GmbH",
   "license": "MIT",
   "devDependencies": {
     "clean-jsdoc-theme": "^3.2.8",
-    "esbuild": "^0.11.14"
+    "esbuild": "^0.11.14",
+    "mocha": "^9.1.2"
   },
   "dependencies": {
     "@wonderlandengine/api": "^0.8.6",
